@@ -1,6 +1,6 @@
 class Viking extends BaseClass {
   constructor(x, y){
-    super(x,y,70,90);
+    super(x,y,70,70);
     this.image = loadImage("sprites/viking.png");
     this.Visiblity = 255;
   }
