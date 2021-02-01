@@ -53,6 +53,12 @@ function setup() {
   rocks.push(rock1);
 
   slingshot = new SlingShot(rock1.body, { x: 200, y: 220 });
+  
+  //set the position of the when mouse is pressed
+  if (mouseIsPressed && gameState == "onSling") {    
+    Matter.Body.setPosition(rocks[rocks.length - 1].body, { x: mouseX, y: mouseY });    
+  }
+
 }
 
 function draw() {
