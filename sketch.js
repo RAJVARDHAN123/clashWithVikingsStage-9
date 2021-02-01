@@ -2,6 +2,8 @@ const Engine = Matter.Engine;
 const World = Matter.World;
 const Bodies = Matter.Bodies;
 const Constraint = Matter.Constraint;
+const MouseConstraint = Matter.MouseConstraint
+const Mouse = Matter.Mouse
 
 var canvas;
 var ground, platform;
@@ -13,6 +15,7 @@ var rock1, rock2, rock3, rock3, rock4;
 var rocks = [];
 var score = 0;
 var rockFlySound;
+
 //games state
 var gameState = "onSling";
 
@@ -20,6 +23,7 @@ function preload() {
   rockFlySound = loadSound("sounds/rock_flying.mp3");
   backgroundImg = loadImage("./assets/background_1.png");
   getBackgroundImg();
+  console.log(backgroundImg)
 }
 
 function setup() {
@@ -53,16 +57,12 @@ function setup() {
   rocks.push(rock1);
 
   slingshot = new SlingShot(rock1.body, { x: 200, y: 220 });
-  
-  //set the position of the when mouse is pressed
-  if (mouseIsPressed && gameState == "onSling") {    
-    Matter.Body.setPosition(rocks[rocks.length - 1].body, { x: mouseX, y: mouseY });    
-  }
-
 }
 
 function draw() {
+  
   background(backgroundImg);
+
   Engine.update(engine);
 
   noStroke();
@@ -72,8 +72,8 @@ function draw() {
   text("Score : " + score, width - 300, 20);
 
   if (rocks.length > 0) {
-    text("Press Space Key for Next rock", width / 2 - 200, 25);
-    text("rock :  " + rocks.length, width / 2 - 100, 60);
+    text("Press Space Key for Next Rock", width / 2 - 200, 25);
+    text("Rock :  " + rocks.length, width / 2 - 100, 60);
   } else {
     text(
       "Click on 'Reload Button' to reload the Game Level",
@@ -105,40 +105,40 @@ function draw() {
   rock4.display();
 
   slingshot.display();
+
+  if (mouseIsPressed && gameState == "onSling") {    
+    Matter.Body.setPosition(rocks[rocks.length - 1].body, { x: mouseX, y: mouseY });    
+  }
+
 }
 
 function mouseDragged() {
-  if (gameState !== "launched") {
-    Matter.Body.setPosition(rocks[rocks.length - 1].body, {
-      x: mouseX,
-      y: mouseY
-    });
-    Matter.Body.applyForce(
-      rocks[rocks.length - 1].body,
-      rocks[rocks.length - 1].body.position,
-      { x: 5, y: -5 }
-    );
-    rockSelectSound.play();
+  if (gameState !== "launched") {    
+    Matter.Body.setPosition(rocks[rocks.length - 1].body, { x: mouseX, y: mouseY });
+    Matter.Body.applyForce(rocks[rocks.length - 1].body, rocks[rocks.length - 1].body.position, { x: 5, y: -5 });
     return false;
   }
 }
 
 //fly the rock when mouse is released
 function mouseReleased() {
-  slingshot.fly();
-  rockFlySound.play();
-  rocks.pop();
-  gameState = "launched";
-  return false;
+  if (gameState !== "launched") {
+    slingshot.fly();
+    rockFlySound.play();
+    rocks.pop();
+    gameState = "launched";
+    locked=false
+    return false;
+  }
+
 }
 
 //set next rock when space key is pressed
 function keyPressed() {
   if (keyCode === 32 && gameState === "launched") {
     if (rocks.length >= 0) {
-      Matter.Body.setPosition(rocks[rocks.length - 1].body, { x: 200, y: 50 });
+      Matter.Body.setPosition(rocks[rocks.length - 1].body, { x: 200, y: 220 });
       slingshot.attach(rocks[rocks.length - 1].body);
-
       gameState = "onSling";
       rockFlySound.play();
     }
@@ -146,19 +146,16 @@ function keyPressed() {
 }
 
 async function getBackgroundImg() {
-  var response = await fetch(
-    "http://worldtimeapi.org/api/timezone/Asia/Kolkata"
-  );
+  var response = await fetch("http://worldtimeapi.org/api/timezone/Asia/Kolkata");
   var responseJSON = await response.json();
-
+ 
   var datetime = responseJSON.datetime;
   var hour = datetime.slice(11, 13);
 
-  if (hour >= 06 && hour <= 19) {
+  if (hour >= 06 && hour <= 17) {
     bg = "./assets/background_1.png";
   } else {
     bg = "./assets/background_2.png";
-  }
-
+  }  
   backgroundImg = loadImage(bg);
 }
